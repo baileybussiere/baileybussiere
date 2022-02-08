@@ -83,7 +83,7 @@ bool do_input(string input)
 	}
 	else if (parsed_input.size() > 10)
 	{
-		cout << pn << "Too many words, nigga." << endl;
+		cout << pn << "Too many words." << endl;
 		return false;
 	}
 
