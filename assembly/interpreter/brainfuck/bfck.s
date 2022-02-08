@@ -221,7 +221,7 @@ process_nums:
 
 section .data
 	prmpt		DB 32,32,32,32,0
-	help_msg:	DB "This is a simple brainfuck interpreter.",10,"There are 16,383 cells to work with.",10,"If the first character of input is 'x' the program will exit.",10,"Cells are wiped in between lines",10,"Use numbers to shorten strings of +'s and -'s: '++++' is equivalent to '+3'",10,"Input taken on next line",10,0
+	help_msg:	DB "This is a simple brainfuck interpreter.",10,"There are 16,383 cells to work with.",10,"If the first character of input is 'x' the program will exit.",10,"Cells are wiped in between lines",10,"Decimal numbers are interpreted as that many copies of the brainfuck instruction directly before them",10,"Input taken on next line",10,0
 	.length:	EQU $-help_msg
 	stack		TIMES 16384 DB 0
 	dec_ptr_test:	DB "Subtracting from pointer... ",0
