@@ -23,6 +23,12 @@ bool f_pers_slots[64]{false};
 void f_set_nextaddr();
 int f_pers_nextaddr{0};
 
+//workaround
+string func_vals[64]{};
+int func_nextaddr{0};
+pair<int, long> f_create(string s);
+//
+
 array<char, 90> alphabet = {'_', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b',
 	'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r',
 	's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
@@ -36,14 +42,16 @@ array<string, 64> functions = {"+", "-", "*", "/", "\\",
 	"+.", "-.", "*.", "/.", "\\.",
 	"<.", ">.", "{.", "}.", "$",
 	"!", "?", "#", "{", "}",
-	"n.", "func.", "f.", "x."};
+	"n.", "func.", "f.", "x.",
+	"wh.", "~wh."};
 array<unsigned int, 64> func_arities = {2, 2, 2, 2, 2,
 	2, 2, 2, 3, 3,
 	2, 2, 1, 2, 2,
 	1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1,
-	1, 2, 0, 0};
+	1, 2, 0, 0,
+	2, 2};
 
 float modulusif(int, float);
 float modulusfi(float, int);
@@ -61,19 +69,19 @@ pair<int, long> (*func_lambdas[64])(vector<pair<int, long>>) = {[](vector<pair<i
 				if(is_int(args[0]) && is_int(args[1])) return make_pair(1, get_int(args[0]) + get_int(args[1]));
 				else if((is_int(args[0]) || is_float(args[0])) && (is_int(args[1]) || is_float(args[1]))) return f_create((is_int(args[0])? get_int(args[0]): get_float(args[0])) + (is_int(args[1])? get_int(args[1]): get_float(args[1])));
 				else if(is_string(args[0]) && is_string(args[1])) return make_pair(2, 0);
-				else{cout << "Invalid type or combination of types passed to '+'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '+'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0]) && is_int(args[1])) return make_pair(1, get_int(args[1]) - get_int(args[0]));
 				else if((is_int(args[0]) || is_float(args[0])) && (is_int(args[1]) || is_float(args[1]))) return f_create((is_int(args[1])? get_int(args[1]): get_float(args[1])) - (is_int(args[0])? get_int(args[0]): get_float(args[0])));
-				else{cout << "Invalid type or combination of types passed to '-'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '-'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0]) && is_int(args[1])) return make_pair(1, get_int(args[0]) * get_int(args[1]));
 				else if((is_int(args[0]) || is_float(args[0])) && (is_int(args[1]) || is_float(args[1]))) return f_create((is_int(args[0])? get_int(args[0]): get_float(args[0])) * (is_int(args[1])? get_int(args[1]): get_float(args[1])));
-				else{cout << "Invalid type or combination of types passed to '*'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '*'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0]) && is_int(args[1])) return make_pair(1, get_int(args[1]) / get_int(args[0]));
 				else if((is_int(args[0]) || is_float(args[0])) && (is_int(args[1]) || is_float(args[1]))) return f_create((is_int(args[1])? get_int(args[1]): get_float(args[1])) / (is_int(args[0])? get_int(args[0]): get_float(args[0])));
-				else{cout << "Invalid type or combination of types passed to '/'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '/'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {if((is_int(args[0]) || is_float(args[0])) && (is_int(args[1]) || is_float(args[1]))){
 				if(is_int(args[1])){
 					if(is_int(args[0])) return make_pair(1, (get_int(args[0]) % get_int(args[1])) == 0? 1: 0);
@@ -85,11 +93,11 @@ pair<int, long> (*func_lambdas[64])(vector<pair<int, long>>) = {[](vector<pair<i
 		[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0]) && is_int(args[1])) return make_pair(1, (get_int(args[1]) < get_int(args[0]))? 1: 0);
 				else if(is_float(args[0]) && is_float(args[1])) return make_pair(1, (get_float(args[1]) < get_float(args[0]))? 1: 0);
-				else{cout << "Invalid type or combination of types passed to '<'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '<'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0]) && is_int(args[1])) return make_pair(1, (get_int(args[1]) > get_int(args[0]))? 1: 0);
 				else if(is_float(args[0]) && is_float(args[1])) return make_pair(1, (get_float(args[1]) > get_float(args[0]))? 1: 0);
-				else{cout << "Invalid type or combination of types passed to '>'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '>'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {if((is_int(args[0]) || is_float(args[0])) && (is_int(args[1]) || is_float(args[1]))){
 				if(is_int(args[1])){
 					if(is_int(args[0])) return make_pair(1, get_int(args[1]) % get_int(args[0]));
@@ -97,41 +105,41 @@ pair<int, long> (*func_lambdas[64])(vector<pair<int, long>>) = {[](vector<pair<i
 				}else{
 					if(is_int(args[0])) return f_create(modulusfi(get_float(args[1]), get_int(args[0])));
 					else return f_create(modulusff(get_float(args[1]), get_float(args[0])));
-				}}else{cout << "Invalid type or combination of types passed to '%'" << endl; return make_pair(-1, 3);}},
+				}}else{cout << error << "Invalid type or combination of types passed to '%'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0])) return get_int(args[0]) == 1? args[2]: args[1];
-				else{cout << "Non-integer type passed as third argument of 'if.'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Non-integer type passed as third argument of 'if.'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0])) return get_int(args[0]) == 0? args[2]: args[1];
-				else{cout << "Non-integer type passed as third argument of '~if.'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Non-integer type passed as third argument of '~if.'" << endl; return make_pair(-1, 3);}},
 		[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0]) && is_int(args[1])) return make_pair(1, (get_int(args[1]) == get_int(args[0]))? 1: 0);
 				else if(is_float(args[0]) && is_float(args[1])) return make_pair(1, (get_float(args[1]) == get_float(args[0]))? 1: 0);
 				else if(is_string(args[0]) && is_string(args[1])) return make_pair(1, (get_string(args[1]) == get_string(args[0]))? 1: 0);
-				else{cout << "Invalid type or combination of types passed to '='" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '='" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {return v_set(args[0], args[1]);},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0])) return (get_int(args[0]) == 0)? make_pair(1, (long) 1): (get_int(args[0]) == 1)? make_pair(1, (long) 0): args[0];
 				else if(is_float(args[0])) return f_create((get_float(args[0]) == 0.0)? 1.0: (get_float(args[0]) == 1.0)? 0.0: get_float(args[0]));
-				else{cout << "Invalid type or combination of types passed to '~'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '~'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(0, 0);},
 	[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(0, 0);},
 		[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0])) return make_pair(1, get_int(args[0]) * 2);
 				else if(is_float(args[0])) return f_create(get_float(args[0]) * 2);
-				else{cout << "Invalid type or combination of types passed to '+.'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '+.'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0])) return f_create((float) get_int(args[0]) / 2.0);
 				else if(is_float(args[0])) return f_create(get_float(args[0]) / 2.0);
-				else{cout << "Invalid type or combination of types passed to '+.'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '+.'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0])) return make_pair(1, get_int(args[0]) * get_int(args[0]));
 				else if(is_float(args[0])) return f_create(get_float(args[0]) * get_float(args[0]));
-				else{cout << "Invalid type or combination of types passed to '*.'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '*.'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {
 				if(is_int(args[0])) return f_create(sqrt(get_int(args[0])));
 				else if(is_float(args[0])) return f_create(sqrt(get_float(args[0])));
-				else{cout << "Invalid type or combination of types passed to '/.'" << endl; return make_pair(-1, 3);}},
+				else{cout << error << "Invalid type or combination of types passed to '/.'" << endl; return make_pair(-1, 3);}},
 	[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(0, 0);}, //Prime check algorithm maybe?
 		[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(1, args[0].second * 2);},
 	[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(1, args[0].second / 2);},
@@ -147,6 +155,10 @@ pair<int, long> (*func_lambdas[64])(vector<pair<int, long>>) = {[](vector<pair<i
 	[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(0, 0);},
 	[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(0, 0);},
 	[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(0, 0);},
+	[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(0, 0);}
+	[](vector<pair<int, long>> args)->pair<int, long> {
+				if (is_int(args[0])) while (get_int(args[0]) == 1)? 
+				return make_pair(0, 0);}
 	[](vector<pair<int, long>> args)->pair<int, long> {return make_pair(0, 0);}
 	};
 
@@ -212,7 +224,7 @@ int main()
 			if(tokens.back() == "```Err")
 				cout << "Parse Error" << endl;
 			else
-				cout << print(process(&tokens[0], tokens.size())) << endl;
+				cout << print(process(&tokens[0], tokens.size(), false)) << endl;
 		}
 	}
 }
@@ -304,7 +316,7 @@ vector<string> tokenise(string s)
 	}
 	if(quoting)
 	{
-		cout << "Unpaired quote" << endl;
+		cout << error << "Unpaired quote" << endl;
 		tokens.push_back("```Err");
 	}
 	else if(buffer != "")
@@ -346,19 +358,22 @@ int char_type(char c)
 
 int function_id(string s)
 {
+	if (debug) cout << "searching for function... ";
 	for (string *i = functions.begin(); i < functions.end(); i++)
 	{
 		if((*i) == s)
 		{
+			if (debug) cout << i - functions.begin() << endl;
 			return i - functions.begin();
 		}
 	}
+	if (debug) cout << "not found." << endl;
 }
 
-pair<int, long> process(string *tokens, int length)
+pair<int, long> process(string *tokens, int length, bool defer)
 {
 	current_index = tokens + 1;
-	if(debug) cout << "Processing..." << endl;
+	if (debug) cout << "Processing..." << endl;
 	if (val_var(*tokens))
 	{
 		long hash = v_hash(*tokens);
@@ -368,7 +383,7 @@ pair<int, long> process(string *tokens, int length)
 			ret = make_pair(-2, hash);
 		else
 			ret = make_pair(0, addr - v_hashes);
-		if(debug) cout << "(" << ret.first << ", " << ret.second << ")" << endl;
+		if (debug) cout << "(" << ret.first << ", " << ret.second << ")" << endl;
 		return ret;
 	}
 	else if (val_num(*tokens))
@@ -387,41 +402,57 @@ pair<int, long> process(string *tokens, int length)
 	{
 		int f_depth = f_nextaddr;
 		int funcid = function_id(*tokens);
-		if (funcid != -1)
+		if(funcid != -1)
 		{
-			vector<pair<int, long>> args{};
-			for (int i = 1; i <= arity(funcid); i++)
+			if(length - (current_index - tokens) >= arity(funcid))
 			{
-				pair<int, long> p = process(current_index, length - (current_index - tokens));
-				if(p.first == -1)
+				if(needs_deferred_processing(funcid))
 				{
-					f_nextaddr = f_depth;
-					return p;
-				}
-				else if(p.first == -2 && funcid != 30) //uninitialized var as arg to anything but 'n.' (id: 30)
-				{
-					cout << "No variable with that name" << endl;
-					f_nextaddr = f_depth;
-					return make_pair(-1, 2);
+					
 				}
 				else
 				{
-					args.push_back(p);
+					vector<pair<int, long>> args{};
+					for(int i = 1; i <= arity(funcid); i++)
+					{
+						pair<int, long> p = process(current_index, length - (current_index - tokens));
+						if(p.first == -1)
+						{
+							f_nextaddr = f_depth;
+							return p;
+						}
+						else if(p.first == -2 && funcid != 30) //uninitialized var as arg to anything but 'n.' (id: 30)
+						{
+							cout << error << "No variable with that name" << endl;
+							f_nextaddr = f_depth;
+							return make_pair(-1, 2);
+						}
+						else
+						{
+							args.push_back(p);
+						}
+					}
+					pair<int, long> ret_val = func_lambdas[funcid](args);
+					if(debug)
+						cout << "(" << ret_val.first << ", " << ret_val.second << ")" << endl;
+					if(is_float(ret_val)) //clear used float mem
+					{
+						f_nextaddr = f_depth + 1;
+						f_vals[f_depth] = f_vals[ret_val.second];
+						ret_val.second = f_depth;
+					}
+					else if(is_string(ret_val)) //clear used string mem
+					{
+					}
+					return ret_val;
 				}
 			}
-			pair<int, long> ret_val = func_lambdas[funcid](args);
-			if(debug)
-				cout << "(" << ret_val.first << ", " << ret_val.second << ")" << endl;
-			if(is_float(ret_val)) //clear used float mem
+			else
 			{
-				f_nextaddr = f_depth + 1;
-				f_vals[f_depth] = f_vals[ret_val.second];
-				ret_val.second = f_depth;
+				cout << error << "Too few arguments passed to " << functions[funcid] << endl;
+				f_nextaddr = f_depth;
+				return make_pair(-1, 0);
 			}
-			else if(is_string(ret_val)) //clear used string mem
-			{
-			}
-			return ret_val;
 		}
 		else
 			return make_pair(-1, 1);
@@ -431,6 +462,11 @@ pair<int, long> process(string *tokens, int length)
 int arity(int id)
 {
 	return func_arities[id];
+}
+
+bool needs_deffered_processing(int id)
+{
+	return (id == 8 || id == 9 || id == 34 || id == 35)
 }
 
 pair<int, long> as_num(string s)
@@ -525,7 +561,7 @@ void f_set_nextaddr()
 			return;
 		}
 	}
-	cout << "Out of float memory" << endl;
+	cout << error << "Out of float memory" << endl;
 	return;
 }
 
@@ -540,7 +576,7 @@ pair<int, long> v_create(pair<int, long> arg)
 	}
 	else
 	{
-		cout << "Invalid argument to 'n.'" << endl;
+		cout << error << "Invalid argument to 'n.'" << endl;
 		return make_pair(-1, 0);
 	}
 }
@@ -565,7 +601,7 @@ pair<int, long> v_set(pair<int, long> arg1, pair<int, long> arg2)
 {
 	if(arg1.first == -2 || arg2.first == -2)
 	{
-		cout << "No variable with that name" << endl;
+		cout << error << "No variable with that name" << endl;
 		return make_pair(-1, 2);
 	}
 	else if(arg1.first == -1)
@@ -574,7 +610,7 @@ pair<int, long> v_set(pair<int, long> arg1, pair<int, long> arg2)
 		return arg2;
 	else if(arg1.first != 0)
 	{
-		cout << "Cannot set unmutable value" << endl;
+		cout << error << "Cannot set unmutable value" << endl;
 		return make_pair(-1, 3);
 	}
 	else if(arg2.first == 0)
@@ -585,7 +621,7 @@ pair<int, long> v_set(pair<int, long> arg1, pair<int, long> arg2)
 		switch(val.first)
 		{
 			case 0:
-				cout << "Unitialized variable cannot be used to set value" << endl;
+				cout << error << "Unitialized variable cannot be used to set value" << endl;
 				return make_pair(-1, 3);
 			case 2: //TODO
 				return make_pair(0, 0);
@@ -659,3 +695,4 @@ long v_hash(string s)
 	}
 	return ret;
 }
+

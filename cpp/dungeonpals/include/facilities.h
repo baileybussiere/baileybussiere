@@ -33,9 +33,11 @@ public:
 	item instantiate() const
 	{
 		item return_item(name, desc, tex_path);
+		cout << "instantiating... " << flush;
 		return_item.metadata1 = 0;
 		return_item.metadata2 = 0;
 		return_item.new_item = true;
+		return return_item;
 	}
 
 	ifstream tex_file()
@@ -117,9 +119,9 @@ uint8_t rc4_shift(uint8_t x, uint8_t shift);
 
 //main.cpp
 void handle_input(string input);
-void draw_dungeon();
+void draw_dungeon(bool debug);
 
 //load.cpp
-void load_maps();
+void load_maps(bool debug);
 
 #endif

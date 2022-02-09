@@ -17,10 +17,11 @@ vector<status> p_stats;
 vector<status> p_lost_stats;
 vector<map> maps;
 vector<map>::iterator curr_map;
+bool debug{false};
 
 void init()
 {
-	load_maps();
+	load_maps(debug);
 	curr_map = maps.begin();
 	p_stats.push_back(status("hurt_head", "Your head aches.", "Your head feels better."));
 	p_lost_stats.push_back(status("intro", "", "You awaken in a dungeon. You remember nothing."));
@@ -28,13 +29,14 @@ void init()
 
 int main()
 {
+	/*if(*argv=="1")*/ debug = false;
 	init();
 	cout << "You awaken in a dungeon." << endl;
 	bool exit = false;
 	while (!exit)
 	{
-		clear_screen();
-		draw_dungeon();
+		if(!debug) clear_screen();
+		draw_dungeon(debug);
 		print_status_mesgs();
 		handle_input(get_input());
 	}
@@ -92,12 +94,27 @@ void handle_input(string input)
 		p_dir = (p_dir + 3) % 4;
 	else if (input == "r" || input == "right" || input == "turn right")
 		p_dir = (p_dir + 1) % 4;
-	else if ((input == "f" || input == "forward" || input == "w" || input == "w") && can_walk())
-		p_pos = pair<int, int>(p_pos.first + ((p_dir & 1)? 0: (p_dir & 2)? -1: 1), p_pos.second + ((p_dir & 1)? ((p_dir & 2)? -1: 1): 0));
-	else if ((input == "d" || input == "down" || input == "descend", input == "climb down") && can_descend())
-		curr_map++;
-	else if ((input == "a" || input == "ascend" || input == "a" || input == "ascend" || input == "climb") && can_ascend())
-		curr_map--;
+	else if (input == "f" || input == "forward" || input == "w" || input == "w")
+	{
+		if (can_walk())
+			p_pos = pair<int, int>(p_pos.first + ((p_dir & 1)? 0: (p_dir & 2)? -1: 1), p_pos.second + ((p_dir & 1)? ((p_dir & 2)? -1: 1): 0));
+		else
+			cout << "You cannot walk forward." << endl;
+	}
+	else if (input == "d" || input == "down" || input == "descend", input == "climb down")
+	{
+		if (can_descend())
+			curr_map++;
+		else
+			cout << "There is no ladder to descend." << endl;
+	}
+	else if (input == "a" || input == "ascend" || input == "a" || input == "ascend" || input == "climb")
+	{
+		if (can_ascend())
+			curr_map--;
+		else
+			cout << "There is no ladder to ascend." << endl;
+	}
 	else if ((input == "t" || input == "take" || input == "p" || input == "pick up"))
 	{
 		vector<tuple<item, int, int>>::const_iterator iter = is_item();
@@ -128,8 +145,9 @@ string get_view_ahead()
 	return s;
 }
 
-void draw_dungeon()
+void draw_dungeon(bool debug)
 {
+	if(debug) cout << "Drawing..." << endl;
 	uint8_t view = get_view();
 	bool l = view & 1; //is path left
 	bool f = view & 2; //is path forward
@@ -140,10 +158,11 @@ void draw_dungeon()
 	ifstream d_rsep((f == r)? "bin/sep": (r? "bin/sepl": "bin/sepb"));
 	ifstream d_mid(f? get_view_ahead(): "bin/s_none");
 	ifstream d_item("bin/items/_none");
+	ifstream d_top(can_ascend()? "bin/t_ladder": "bin/t_");
 	vector<tuple<item, int, int>>::iterator item_ptr = is_item();
 	bool item_flag = item_ptr != (*curr_map).items.end();
-	//if (item_flag)
-	//	d_item = (*item_ptr).tex_file();
+	if (item_flag)
+		d_item = get<0>((*item_ptr)).tex_file();
 	for (int i = 0; i < 24; ++i)
 	{
 		string line = "";
@@ -152,8 +171,21 @@ void draw_dungeon()
 		line += s;
 		getline(d_lsep, s);
 		line += s;
-		getline(d_mid, s);
-		line += s;
+		if (i >= 3 && (i < 20 || !item_flag))
+		{
+			getline(d_mid, s);
+			line += s;
+		}
+		else if (i < 3)
+		{
+			getline(d_top, s);
+			line += s;
+		}
+		else
+		{
+			getline(d_item, s);
+			line += "          " + s + "          ";
+		}
 		getline(d_rsep, s);
 		line += s;
 		getline(d_right, s);
